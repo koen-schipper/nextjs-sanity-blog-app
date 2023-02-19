@@ -3,6 +3,7 @@ import { deskTool } from "sanity/desk"
 import { visionTool } from "@sanity/vision"
 import { schemaTypes } from "./schemas"
 import { myTheme } from "theme"
+import { scheduledPublishing } from "@sanity/scheduled-publishing"
 import StudioNavbar from "components/StudioNavbar"
 import Logo from "components/Logo"
 
@@ -15,7 +16,7 @@ export default defineConfig({
     title: "KoenSchipper Content Studio",
     projectId,
     dataset,
-    plugins: [deskTool(), visionTool()],
+    plugins: [deskTool(), visionTool(), scheduledPublishing()],
     schema: {
         types: schemaTypes
     },
