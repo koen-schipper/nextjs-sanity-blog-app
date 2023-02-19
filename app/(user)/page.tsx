@@ -6,6 +6,8 @@ import PreviewBlogList from "../../components/PreviewBlogList"
 import BlogList from "components/BlogList"
 import Banner from "components/Banner"
 
+export const revalidate = 60
+
 const query = groq`
     *[_type == "post"] {
         ...,

@@ -4,6 +4,7 @@ import Image from "next/image"
 import urlFor from "../../../../lib/urlFor"
 import { PortableText } from "@portabletext/react"
 import { RichTextComponents } from "components/RichTextComponents"
+import { Key, ReactElement, JSXElementConstructor, ReactFragment, ReactPortal } from "react"
 
 type Props = {
     params: {
@@ -11,7 +12,24 @@ type Props = {
     }
 }
 
-export default async function Post({ params: { slug } }: Props) {
+export const revalidate = 60
+
+export async function generateStaticParams() {
+    const query = groq`
+        *[_type == "post"] {
+            slug
+        }
+    `
+
+    const slugs: Post[] = await client.fetch(query)
+    const slugRoutes = slugs.map(slug => slug.slug.current)
+
+    return slugRoutes.map(slug => ({
+        slug
+    }))
+}
+
+async function Post({ params: { slug } }: Props) {
     const query = groq`
         *[_type == "post" && slug.current == $slug][0]
         {
@@ -72,14 +90,27 @@ export default async function Post({ params: { slug } }: Props) {
                         <div>
                             <h2 className='italic pt-10'>{post.description}</h2>
                             <div className='flex items-center justify-end gap-x-1'>
-                                {post.categories.map(category => (
-                                    <p
-                                        key={category._id}
-                                        className='bg-gray-800 text-white px-3 py-1 rounded-full text-sm font-semibold mt-4'
-                                    >
-                                        {category.title}
-                                    </p>
-                                ))}
+                                {post.categories.map(
+                                    (category: {
+                                        _id: Key | null | undefined
+                                        title:
+                                            | string
+                                            | number
+                                            | boolean
+                                            | ReactElement<any, string | JSXElementConstructor<any>>
+                                            | ReactFragment
+                                            | ReactPortal
+                                            | null
+                                            | undefined
+                                    }) => (
+                                        <p
+                                            key={category._id}
+                                            className='bg-gray-800 text-white px-3 py-1 rounded-full text-sm font-semibold mt-4'
+                                        >
+                                            {category.title}
+                                        </p>
+                                    )
+                                )}
                             </div>
                         </div>
                     </section>
@@ -91,3 +122,5 @@ export default async function Post({ params: { slug } }: Props) {
         </article>
     )
 }
+
+export default Post
